@@ -5,9 +5,9 @@
 #include <sys/stat.h>
 //#include "help.h"
 #include "explorer.h"
+//TODO: printing with metrics(B, KB, MB, etc.)
 
-
-int get_files(file** files, const char* path) {
+int get_files(file** files, char* path) { //get files in files array
     DIR *d;
     struct dirent *dir;
     struct stat file_stat;
@@ -16,7 +16,6 @@ int get_files(file** files, const char* path) {
     char *full_path;
 
     if((d = opendir(path)) != NULL) {
-
         while((dir = readdir(d)) != NULL) {
             if(strcmp(dir->d_name, ".") == 0 || strcmp(dir->d_name, "..") == 0) {
                 continue;
@@ -46,32 +45,7 @@ int get_files(file** files, const char* path) {
     return file_count;
 }
 
-int alphabet_compare(const void *a, const void *b) { //add to help.c
-    return strcmp(((file *)a)->name, ((file *)b)->name);
-}
-
-int realphabet_compare(const void *a, const void *b) { //add to help.c
-    return -(strcmp(((file *)a)->name, ((file *)b)->name));
-}
-
-
-void sort_files(file** files, unsigned int count, char order) {
-    if(order == 'a') {
-        qsort(*files, count, sizeof(file), alphabet_compare);
-    } else if(order == 'r') {
-        qsort(*files, count, sizeof(file), realphabet_compare);
-    } else {
-        printf("Wrong sort mode");
-    }
-}
-
-void print_files(file* files, unsigned int count, char* opts) {
-    for(unsigned int i = 0; i < count; i++) {
-        printf("%s - %lu\n", files[i].name, files[i].size);
-    }
-}
-
-int get_dirs(directory **dirs, char* path) {
+int get_dirs(directory **dirs, char* path) { //get directories in directories array
     DIR *d;
     struct dirent *dir;
     struct stat dir_stat;
@@ -112,6 +86,7 @@ int get_dirs(directory **dirs, char* path) {
                             (*dirs)[dir_count].size += st.st_size;
                         }
                     }
+                    closedir(cur_d);
                 }
                 dir_count++;
             }
@@ -124,18 +99,59 @@ int get_dirs(directory **dirs, char* path) {
     return dir_count;
 }
 
-void print_dirs(directory* dirs, unsigned int count, char* opts) {
-    for(unsigned int i = 0; i < count; i++) {
-        printf("%s - %lu\n", dirs[i].name, dirs[i].size);
+int alphabet_compare(const void *a, const void *b) { //add to help.c Compare in alphabet order
+    return strcmp(((file *)a)->name, ((file *)b)->name);
+}
+
+int realphabet_compare(const void *a, const void *b) { //add to help.c Compare in reverse alphabet order
+    return -(strcmp(((file *)a)->name, ((file *)b)->name));
+}
+
+int less_compare(const void *a, const void *b) { //add to help.c Compare from less to greater
+    long res = ((file *)a)->size - ((file *)b)->size;
+    if(res > 0) return 1;
+    if(res < 0) return -1;
+    return 0;
+}
+
+int greater_compare(const void *a, const void *b) { //add to help.c Compare from greater to less
+    long res = ((file *)a)->size - ((file *)b)->size;
+    if(res > 0) return -1;
+    if(res < 0) return 1;
+    return 0;
+}
+
+void sort_files(file** files, unsigned int count, char order) { //sorting files according to order
+    if(order == 'a') {
+        qsort(*files, count, sizeof(file), alphabet_compare);
+    } else if(order == 'r') {
+        qsort(*files, count, sizeof(file), realphabet_compare);
+    } else if(order == 'l') {
+        qsort(*files, count, sizeof(file), less_compare);
+    } else if(order == 'g') {
+        qsort(*files, count, sizeof(file), greater_compare);
+    } else {
+        printf("Wrong sort mode");
     }
 }
 
-void sort_dirs(directory** dirs, unsigned int count, char order) {
-    if(order == 'a') {
-        qsort(*dirs, count, sizeof(directory), alphabet_compare);
-    } else if(order == 'r') {
-        qsort(*dirs, count, sizeof(directory), realphabet_compare);
-    } else {
-        printf("Wrong sort mode");
+void print_files(file* files, unsigned int count, char* opts) { //printing according to options
+    char* head;
+    char* tail;
+    unsigned int head_count, tail_count;
+    unsigned int i = 0;
+
+    if ((head = strchr(opts, 'h')) != NULL) {
+        if (sscanf(head, "h%d", &head_count) == 1) 
+            count = head_count;
+    } else if ((tail = strchr(opts, 't')) != NULL) {
+        if(sscanf(tail, "t%d", &tail_count) == 1)
+            i = count - tail_count;
+    }
+
+    for(; i < count; i++) {
+        printf("%s", files[i].name);
+        if(strchr(opts, 's') != NULL) printf(" - %lu B\n", files[i].size);
+        else printf("\n");
     }
 }
