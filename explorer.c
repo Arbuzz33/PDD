@@ -3,11 +3,11 @@
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
-//#include "help.h"
+#include "help.h"
 #include "explorer.h"
-//TODO: printing with metrics(B, KB, MB, etc.)
 
-int get_files(file** files, char* path) { //get files in files array
+
+int get_files(file** files, const char* path) { //get files in files array
     DIR *d;
     struct dirent *dir;
     struct stat file_stat;
@@ -45,7 +45,41 @@ int get_files(file** files, char* path) { //get files in files array
     return file_count;
 }
 
-int get_dirs(directory **dirs, char* path) { //get directories in directories array
+long get_dir_size(const char* path) {
+    struct stat statbuf;
+    DIR *dir;
+    struct dirent *entry;
+    long dir_size = 0;
+    char full_path[1024];
+
+    if(lstat(path, &statbuf) == -1) {
+        return -1;
+    }
+    dir_size += statbuf.st_size;
+    if(S_ISLNK(statbuf.st_mode)) {
+        return dir_size;
+    }
+    if(!S_ISDIR(statbuf.st_mode)) {
+        return dir_size;
+    }
+
+    if((dir = opendir(path)) != NULL) {
+        while((entry = readdir(dir)) != NULL) {
+            if(strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0) {
+                continue;
+            }
+            snprintf(full_path, 1024, "%s/%s", path, entry->d_name);
+            long sub_size = get_dir_size(full_path);
+            if(sub_size != -1) {
+                dir_size += sub_size;
+            }
+        }
+    }
+    closedir(dir);
+    return dir_size;
+}
+
+int get_dirs(directory **dirs, const char* path) { //get directories in directories array
     DIR *d;
     struct dirent *dir;
     struct stat dir_stat;
@@ -64,30 +98,14 @@ int get_dirs(directory **dirs, char* path) { //get directories in directories ar
                 return -1;
             }
             snprintf(full_path, 1024, "%s/%s", path, dir->d_name);
-            if(stat(full_path, &dir_stat) == !(S_ISDIR(dir_stat.st_mode))) {
-                DIR *cur_d;
-                struct dirent *cur_dir;
-                struct stat st;
+            if(stat(full_path, &dir_stat) == !S_ISDIR(dir_stat.st_mode)) {
                 *dirs = realloc(*dirs, sizeof(directory) * (dir_count+1));
                 if(!*dirs) {
                     perror("Can not reallocate memory!");
                     return -2;
                 }
                 strcpy((*dirs)[dir_count].name, dir->d_name);
-                (*dirs)[dir_count].size = dir_stat.st_size;
-                if((cur_d = opendir(full_path)) != NULL) {
-                    while((cur_dir = readdir(cur_d)) != NULL) {
-                        if(strcmp(cur_dir->d_name, ".") == 0 || strcmp(cur_dir->d_name, "..") == 0) {
-                            continue;
-                        }
-                        char cur_full_path[1024];
-                        snprintf(cur_full_path, 1024, "%s/%s", full_path, cur_dir->d_name);
-                        if(stat(cur_full_path, &st) == S_ISDIR(st.st_mode)) {
-                            (*dirs)[dir_count].size += st.st_size;
-                        }
-                    }
-                    closedir(cur_d);
-                }
+                (*dirs)[dir_count].size = get_dir_size(full_path);
                 dir_count++;
             }
             free(full_path);
@@ -121,7 +139,7 @@ int greater_compare(const void *a, const void *b) { //add to help.c Compare from
     return 0;
 }
 
-void sort_files(file** files, unsigned int count, char order) { //sorting files according to order
+void sort_files(file** files, unsigned int count, const char order) { //sorting files according to order
     if(order == 'a') {
         qsort(*files, count, sizeof(file), alphabet_compare);
     } else if(order == 'r') {
@@ -135,9 +153,12 @@ void sort_files(file** files, unsigned int count, char order) { //sorting files 
     }
 }
 
-void print_files(file* files, unsigned int count, char* opts) { //printing according to options
+void print_files(file* files, unsigned int count, const char* opts) { //printing according to options
+    const char* units[5] = {"B", "KB", "MB", "GB", "TB"};
     char* head;
     char* tail;
+    char* size_str;
+    int size = -1;
     unsigned int head_count, tail_count;
     unsigned int i = 0;
 
@@ -148,10 +169,20 @@ void print_files(file* files, unsigned int count, char* opts) { //printing accor
         if(sscanf(tail, "t%d", &tail_count) == 1)
             i = count - tail_count;
     }
+    if((size_str = strchr(opts, 's')) != NULL) {
+        size = 0;
+        sscanf(size_str, "s%d", &size);
+    }
 
     for(; i < count; i++) {
         printf("%s", files[i].name);
-        if(strchr(opts, 's') != NULL) printf(" - %lu B\n", files[i].size);
+        if(size != -1) {
+            double temp_size = files[i].size;
+            for(byte j = 0; j < size; j++) {
+                temp_size /= 1024.0f;
+            }
+            printf(" - %6.2f %s\n", temp_size, units[size]);
+        }
         else printf("\n");
     }
 }
