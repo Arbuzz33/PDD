@@ -1,20 +1,39 @@
-#include "disk_info.h"
-#include "help.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include "disk_info.h"
+#include "help.h"
+#include "explorer.h"
+#include "format.h"
 
 disk_info *system_disks = NULL;
 int count = 0;
 char command[256];
 char *path;
 char input[80] = "pddc";
+file *files;
+directory *dirs;
+unsigned int file_count = 0;
+unsigned int dir_count = 0;
 
 int main(int argc, char* argv[]) {
     count = get_block_devs(&system_disks);
     get_partitions(&system_disks, count);
     get_program_path(&path);
+    //call_fdisk("/dev/sda");
+    //call_mkfs("/dev/sda1", "ext4");
+    
+    //if((file_count = get_files(&files, "/home/nigger/Desktop")) > 0) {
+    //    sort_files(files, file_count, 'g');
+    //    print_files(files, file_count, "s");
+    //}
+
+    //if((dir_count = get_dirs(&dirs, "/home/nigger/Desktop")) > 0) {
+    //    sort_files(&dirs, dir_count, 'l');
+    //    print_files(dirs, dir_count, "t3s2");
+    //}
+
     if(argc < 2) {
         printf("%s\n", VERSION);
     } else {

@@ -1,7 +1,7 @@
 CC = gcc
 CFLAGS = -Wall -g
 TARGET = pdd
-SRC = main.c explorer.c help.c disk_info.c
+SRC = main.c explorer.c help.c disk_info.c format.c
 OBJ = $(SRC:.c=.o)
 
 all: $(TARGET)
