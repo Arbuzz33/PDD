@@ -16,11 +16,20 @@ file *files;
 directory *dirs;
 unsigned int file_count = 0;
 unsigned int dir_count = 0;
-
-int main(int argc, char* argv[]) {
+void disk_info_print(){
     count = get_block_devs(&system_disks);
     get_partitions(&system_disks, count);
     get_program_path(&path);
+    for(int i = 0; i < count; i++)
+        for(int j = 0; j < system_disks[i].parts_count-1; j++)
+            mount_part(path, system_disks[i].parts[j].nam);
+
+    for(int i = 0; i < count; i++)
+        get_mounted_info(path, &(system_disks[i]));
+    print_info(system_disks, count);
+}
+int main(int argc, char* argv[]) {
+    parse_args(argc,argv);
     //call_fdisk("/dev/sda");
     //call_mkfs("/dev/sda1", "ext4");
     
@@ -34,25 +43,11 @@ int main(int argc, char* argv[]) {
     //    print_files(dirs, dir_count, "t3s2");
     //}
 
-    if(argc < 2) {
-        printf("%s\n", VERSION);
-    } else {
-        //for(int i = 1; i < argc; i++)
-        //    printf("%s\n", argv[i]);
-        while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
-            printf("pdd> ");
-            scanf("%s", input);
-            printf("%s\n", input);
-            parse_cli(input);
-        }
-
-        //for(int i = 0; i < count; i++)
-        //    for(int j = 0; j < system_disks[i].parts_count-1; j++)
-        //        mount_part(path, system_disks[i].parts[j].nam);
-
-        //for(int i = 0; i < count; i++)
-        //  get_mounted_info(path, &(system_disks[i]));
-        //print_info(system_disks, count);
+    while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
+        printf("pdd> ");
+        scanf("%s", input);
+        printf("%s\n", input);
+        parse_cli(input);
     }
     return 0;
 }
