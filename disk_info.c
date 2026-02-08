@@ -9,6 +9,7 @@
 #include <unistd.h>
 #include <mntent.h>
 #include <sys/sysinfo.h>
+#include "help.h"
 
 
 int get_block_devs(disk_info **dsks) {
@@ -76,7 +77,7 @@ void print_size(unsigned long long s, byte u) {
     printf("%-6.2f %-6s", size, units[u]);
 }
 
-void print_info(disk_info *disks, int count) {
+void print_disk_info(disk_info *disks, int count) {
     printf("%-20s %-12s %-12s %-12s %-6s %s\n", "Name", "Size", "Used", "Free", "FS", "Mountpoint");
     printf("--------------------------------------------------------------------------------------------\n");
     for(int i = 0; i < count; i++) {
@@ -172,6 +173,8 @@ int get_mounted_info(char* path, disk_info *disk) {
     endmntent(f);
     return 0;
 }
+
+
 
 void get_swap() {
     struct statvfs info;

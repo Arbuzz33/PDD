@@ -16,20 +16,10 @@ file *files;
 directory *dirs;
 unsigned int file_count = 0;
 unsigned int dir_count = 0;
-void disk_info_print(){
-    count = get_block_devs(&system_disks);
-    get_partitions(&system_disks, count);
-    get_program_path(&path);
-    for(int i = 0; i < count; i++)
-        for(int j = 0; j < system_disks[i].parts_count-1; j++)
-            mount_part(path, system_disks[i].parts[j].nam);
 
-    for(int i = 0; i < count; i++)
-        get_mounted_info(path, &(system_disks[i]));
-    print_info(system_disks, count);
-}
 int main(int argc, char* argv[]) {
     parse_args(argc,argv);
+    get_program_path(&path);
     //call_fdisk("/dev/sda");
     //call_mkfs("/dev/sda1", "ext4");
     
@@ -46,8 +36,53 @@ int main(int argc, char* argv[]) {
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
         scanf("%s", input);
-        printf("%s\n", input);
-        parse_cli(input);
+        //printf("%s\n", input);
+        if(strcmp(input, "quit") == 0 || strcmp(input, "exit") == 0) {
+            printf("Bye!");
+        }
+        else if(strcmp(input, "help") == 0) {
+            print_help();
+        }
+        else if (strcmp(input, "diskinfo") == 0)
+        {
+            char option;
+            count = get_block_devs(&system_disks);
+            get_partitions(&system_disks, count);
+            printf("Do you want to mount the disks? [Y/N] ");
+            scanf("%s", &option);
+            if (option == 'Y' || option == 'y'){
+                for(int i = 0; i < count; i++)
+                    for(int j = 0; j < system_disks[i].parts_count-1; j++)
+                        mount_part(path, system_disks[i].parts[j].nam);
+                for(int i = 0; i < count; i++)
+                    get_mounted_info(path, &(system_disks[i]));
+            }
+            print_disk_info(system_disks, count);
+        }
+        else if (strcmp(input, "unmountdisks") == 0)
+        {   
+            char option;
+            printf("Are you sure? [Y/N] ");
+            scanf("%s", &option);
+            if (option == 'Y' || option == 'y'){
+                for(int i = 0; i < count; i++)
+                    for(int j = 0; j < system_disks[i].parts_count-1; j++)
+                        umount_part(path, system_disks[i].parts[j].nam);
+            }
+        }
+        else if(strcmp(input, "textinvert") == 0) {
+            printf(INVERT);
+        }
+        else if(strcmp(input, "textdefault") == 0) {
+            printf(DEFAULT);
+        }
+        else {
+            printf(" Bad usage. Type \"help\" to check yourself \n");
+        }
+        
     }
     return 0;
+    /*commands: printfiles(s[0-4]-size,t-tail[0-count],h-head[0-count]),
+    printdirs(s[0-4]-size,t-tail[0-count],h-head[0-count]),
+    */
 }

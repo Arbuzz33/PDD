@@ -21,6 +21,15 @@ void get_program_path(char** p) {
         return;
     }
 }
+void print_help(){
+    printf("Available commands:\n");
+    printf("1.quit/exit - exit the application\n");
+    printf("2.diskinfo - get information about disks with option to mount them\n");
+    printf("3.unmountdisks - unmount all mounted disks\n");
+    printf("4.printfiles(path_to_directory,s[0-4]-size,t-tail[0-count],h-head[0-count]) - print all files in a directory (with options)\n");
+    printf("5.printdirs(path_to_directory,s[0-4]-size,t-tail[0-count],h-head[0-count]) - print all directories in a directory (with options)\n");
+    printf("printfiles and printdirs have sorting:a - alphabet,r - reversed alphabet; l - smaller files first, g - nigger files first\n");
+}
 void parse_args(int argc, char* argv[]){
 
     for(int i = 1; i < argc; i++){
@@ -41,31 +50,15 @@ void parse_args(int argc, char* argv[]){
             printf(TextColors.colorYellow); 
             printf(BackGroundColors.colorRed);
         }
+        if (strcmp(argv[i], "--epsteintheme")==0){
+            printf(TextColors.colorBlack);
+            printf(BackGroundColors.colorBlack);
+            printf(BOLD);
+        }
         if (strcmp(argv[i], "--bold") == 0){
             printf(BOLD);
         }
      }
     printf(LOGO);
     printf(STARTMESSAGE);
-}
-void parse_cli(char* input) {
-    if(strcmp(input, "quit") == 0 || strcmp(input, "exit") == 0) {
-        printf("Bye!");
-    }
-    else if(strcmp(input, "help") == 0) {
-        printf(COMMANDS);
-    }
-    else if (strcmp(input, "diskinfo") == 0)
-    {
-        disk_info_print();
-    }
-    else if(strcmp(input, "textinvert") == 0) {
-        printf(INVERT);
-    }
-    else if(strcmp(input, "textdefault") == 0) {
-        printf(DEFAULT);
-    }
-    else {
-        printf(" Bad usage. Type \"help\" to check yourself \n");
-    }
 }

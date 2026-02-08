@@ -6,7 +6,6 @@
 #include "help.h"
 #include "explorer.h"
 
-
 int get_files(file** files, const char* path) { //get files in files array
     DIR *d;
     struct dirent *dir;

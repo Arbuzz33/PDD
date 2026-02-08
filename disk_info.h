@@ -1,12 +1,7 @@
 #ifndef DISK_INFO_INCLUDED
 #define DISK_INFO_INCLUDED
-
-#define KB_SIZE 1
-#define MB_SIZE 2
-#define GB_SIZE 3
-#define TB_SIZE 4
+#include "help.h"
 #define disks_dir "/sys/block"
-typedef unsigned char byte;
 
 typedef struct {
     char nam[128];
@@ -34,6 +29,6 @@ void get_partitions(disk_info **disks, int c);
 void mount_part(char* path, char* name);
 void umount_part(char* path, char* name);
 int get_mounted_info(char* path, disk_info *disk);
-void print_info(disk_info *disks, int count);
+void print_disk_info(disk_info *disks, int count);
 
 #endif
