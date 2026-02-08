@@ -6,7 +6,7 @@ TODO:
 1) CLI keywords parsing +-
 2) ~~Add themes~~
 3) ~~Directory LookUpper~~
-4) ASCII Logo (in Russian colors) +-
+4) ~~ASCII Logo~~
 5) ~~Installer (in makefile)~~
 6) Ivan has to write docs and presentation
 7) Add secondary disk properties
