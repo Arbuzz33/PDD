@@ -6,6 +6,7 @@
 #include "help.h"
 #include "explorer.h"
 
+
 int get_files(file** files, const char* path) { //get files in files array
     DIR *d;
     struct dirent *dir;
@@ -138,21 +139,7 @@ int greater_compare(const void *a, const void *b) { //add to help.c Compare from
     return 0;
 }
 
-void sort_files(file** files, unsigned int count, const char order) { //sorting files according to order
-    if(order == 'a') {
-        qsort(*files, count, sizeof(file), alphabet_compare);
-    } else if(order == 'r') {
-        qsort(*files, count, sizeof(file), realphabet_compare);
-    } else if(order == 'l') {
-        qsort(*files, count, sizeof(file), less_compare);
-    } else if(order == 'g') {
-        qsort(*files, count, sizeof(file), greater_compare);
-    } else {
-        printf("Wrong sort mode");
-    }
-}
-
-void print_files(file* files, unsigned int count, const char* opts) { //printing according to options
+void print_files(file** files, unsigned int count, const char* opts) { //printing according to options
     const char* units[5] = {"B", "KB", "MB", "GB", "TB"};
     char* head;
     char* tail;
@@ -172,11 +159,21 @@ void print_files(file* files, unsigned int count, const char* opts) { //printing
         size = 0;
         sscanf(size_str, "s%d", &size);
     }
+    
+    if(strchr(opts, 'a') != NULL) {
+        qsort(*files, count, sizeof(file), alphabet_compare);
+    } else if(strchr(opts, 'r') != NULL) {
+        qsort(*files, count, sizeof(file), realphabet_compare);
+    } else if(strchr(opts, 'l') != NULL) {
+        qsort(*files, count, sizeof(file), less_compare);
+    } else if(strchr(opts, 'g') != NULL) {
+        qsort(*files, count, sizeof(file), greater_compare);
+    }
 
     for(; i < count; i++) {
-        printf("%s", files[i].name);
+        printf("%s", (*files)[i].name);
         if(size != -1) {
-            double temp_size = files[i].size;
+            double temp_size = (*files)[i].size;
             for(byte j = 0; j < size; j++) {
                 temp_size /= 1024.0f;
             }

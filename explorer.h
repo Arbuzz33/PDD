@@ -19,9 +19,7 @@ int realphabet_compare(const void *a, const void *b); //add to help.h
 int less_compare(const void *a, const void *b); //add to help.h
 int greater_compare(const void *a, const void *b); //add to help.h
 
-void sort_files(file** files, unsigned int count, const char order);
-
-void print_files(file* files, unsigned int count, const char* opts);
+void print_files(file** files, unsigned int count, const char* opts);
 
 
 #endif
