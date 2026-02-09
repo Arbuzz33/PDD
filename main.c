@@ -24,21 +24,22 @@ int main(int argc, char* argv[]) {
     //call_mkfs("/dev/sda1", "ext4");
     
     //if((file_count = get_files(&files, "/home/nigger/Desktop")) > 0) {
-    //    sort_files(files, file_count, 'g');
     //    print_files(files, file_count, "s");
     //}
 
     //if((dir_count = get_dirs(&dirs, "/home/nigger/Desktop")) > 0) {
-    //    sort_files(&dirs, dir_count, 'l');
     //    print_files(dirs, dir_count, "t3s2");
     //}
+
+    //get_disk_stats("sda");
+    //printf("nvme0n1 temperature: %f\n", get_disk_temp("nvme0n1"));
+    //call_badblocks("nvme0n1");
 
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
         scanf("%s", input);
-        //printf("%s\n", input);
         if(strcmp(input, "quit") == 0 || strcmp(input, "exit") == 0) {
-            printf("Bye!");
+            printf("Bye!\n");
         }
         else if(strcmp(input, "help") == 0) {
             print_help();
@@ -79,7 +80,6 @@ int main(int argc, char* argv[]) {
         else {
             printf(" Bad usage. Type \"help\" to check yourself \n");
         }
-        
     }
     return 0;
     /*commands: printfiles(s[0-4]-size,t-tail[0-count],h-head[0-count]),

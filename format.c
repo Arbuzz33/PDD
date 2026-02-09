@@ -3,13 +3,13 @@
 #include <stdio.h>
 #include <string.h>
 
-void call_fdisk(const char* device) {
+void call_fdisk(const char* device) { // /dev/sda
     char com[512];
     snprintf(com, 512, "sudo fdisk %s", device);
     system(com);
 }
 
-void call_mkfs(const char* partition, const char* fs_name) { // /dev/sda
+void call_mkfs(const char* partition, const char* fs_name) { // /dev/sda1, fat
     char com[512];
     if(strcmp(fs_name, "fat") == 0)
         snprintf(com, 512, "sudo mkfs.%s -F 32 %s", fs_name, partition);

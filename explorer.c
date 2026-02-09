@@ -7,7 +7,7 @@
 #include "explorer.h"
 
 
-int get_files(file** files, const char* path) { //get files in files array
+int get_files(file** files, const char* path) { // &files_array, "/home"
     DIR *d;
     struct dirent *dir;
     struct stat file_stat;
@@ -45,7 +45,7 @@ int get_files(file** files, const char* path) { //get files in files array
     return file_count;
 }
 
-long get_dir_size(const char* path) {
+long get_dir_size(const char* path) { // "/home"
     struct stat statbuf;
     DIR *dir;
     struct dirent *entry;
@@ -79,7 +79,7 @@ long get_dir_size(const char* path) {
     return dir_size;
 }
 
-int get_dirs(directory **dirs, const char* path) { //get directories in directories array
+int get_dirs(directory **dirs, const char* path) { // &dirs_array, "/home"
     DIR *d;
     struct dirent *dir;
     struct stat dir_stat;
@@ -117,29 +117,7 @@ int get_dirs(directory **dirs, const char* path) { //get directories in director
     return dir_count;
 }
 
-int alphabet_compare(const void *a, const void *b) { //add to help.c Compare in alphabet order
-    return strcmp(((file *)a)->name, ((file *)b)->name);
-}
-
-int realphabet_compare(const void *a, const void *b) { //add to help.c Compare in reverse alphabet order
-    return -(strcmp(((file *)a)->name, ((file *)b)->name));
-}
-
-int less_compare(const void *a, const void *b) { //add to help.c Compare from less to greater
-    long res = ((file *)a)->size - ((file *)b)->size;
-    if(res > 0) return 1;
-    if(res < 0) return -1;
-    return 0;
-}
-
-int greater_compare(const void *a, const void *b) { //add to help.c Compare from greater to less
-    long res = ((file *)a)->size - ((file *)b)->size;
-    if(res > 0) return -1;
-    if(res < 0) return 1;
-    return 0;
-}
-
-void print_files(file** files, unsigned int count, const char* opts) { //printing according to options
+void print_files(file** files, unsigned int count, const char* opts) { // &files_array or &dirs_array, count, "sgh10"
     const char* units[5] = {"B", "KB", "MB", "GB", "TB"};
     char* head;
     char* tail;

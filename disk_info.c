@@ -1,4 +1,3 @@
-#include "disk_info.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/statvfs.h>
@@ -9,10 +8,12 @@
 #include <unistd.h>
 #include <mntent.h>
 #include <sys/sysinfo.h>
+#include <glob.h>
+#include "disk_info.h"
 #include "help.h"
 
 
-int get_block_devs(disk_info **dsks) {
+int get_block_devs(disk_info **dsks) { // &disks
     DIR *dir;
     struct dirent *entry;
     char path[512];
@@ -25,6 +26,8 @@ int get_block_devs(disk_info **dsks) {
         return -1;
     }
     while((entry = readdir(dir)) != NULL) {
+        FILE *fp;
+        char buf[128];
         if (strcmp(entry->d_name, ".") == 0 || 
             strcmp(entry->d_name, "..") == 0 ||
             strncmp(entry->d_name, "loop", 4) == 0 ||
@@ -43,32 +46,47 @@ int get_block_devs(disk_info **dsks) {
         memset(disk, 0, sizeof(disk_info));
         snprintf(disk->name, sizeof(disk->name), "/dev/%s", entry->d_name);
         disk->size_total = get_disk_size(entry->d_name);
+
+        snprintf(buf, 128, "%s/%s/queue/rotational", disks_dir, entry->d_name);
+        fp = fopen(buf, "r");
+        if(fp) {
+            disk->type = (fgetc(fp) - 48);
+            fclose(fp);
+        }
+
+        snprintf(buf, 128, "%s/%s/device/model", disks_dir, entry->d_name);
+        fp = fopen(buf, "r");
+        if(fp) {
+            if(fgets(buf, 128, fp)) {
+                strncpy(disk->model, buf, 128);
+            }
+            fclose(fp);
+        }
+
         count++;
     }
     closedir(dir);
     return count;
 }
 
-unsigned long long get_disk_size(const char* dev_name) {
+unsigned long long get_disk_size(const char* dev_name) { // sda
     FILE *fp;
     char path[512];
     unsigned long long size = 0;
     
-    // Попробовать прочитать размер из sysfs
     snprintf(path, sizeof(path), "/sys/block/%s/size", dev_name);
     fp = fopen(path, "r");
     if (fp) {
         if (fscanf(fp, "%llu", &size) == 1) {
             fclose(fp);
-            return size * 512; // Размер в секторах по 512 байт
+            return size * 512;
         }
         fclose(fp);
     }
-    
     return 0;
 }
 
-void print_size(unsigned long long s, byte u) {
+void print_size(unsigned long long s, byte u) { // size, units
     const char* units[] = {"B", "KB", "MB", "GB", "TB"}; 
     double size = s;
     for(byte i = 0; i < u; i++) {
@@ -77,13 +95,14 @@ void print_size(unsigned long long s, byte u) {
     printf("%-6.2f %-6s", size, units[u]);
 }
 
-void print_disk_info(disk_info *disks, int count) {
+void print_disk_info(disk_info *disks, int count) { // disks, count
     printf("%-20s %-12s %-12s %-12s %-6s %s\n", "Name", "Size", "Used", "Free", "FS", "Mountpoint");
     printf("--------------------------------------------------------------------------------------------\n");
     for(int i = 0; i < count; i++) {
         printf("%-21s", disks[i].name);
         print_size(disks[i].size_total, GB_SIZE);
-        printf("\n");
+        printf("%s", disks[i].type ? "HDD" : "SSD");
+        printf("   %s", disks[i].model);
         for(int j = 0; j < disks[i].parts_count-1; j++) {
             partition pt = disks[i].parts[j];
             printf("  %-19s", pt.nam);
@@ -95,7 +114,7 @@ void print_disk_info(disk_info *disks, int count) {
     }
 }
 
-void get_partitions(disk_info **disks, int c) {
+void get_partitions(disk_info **disks, int c) { // &disks, count
     for(int i = 0; i < c; i++) {
         int next = 0;
         int count = 1;
@@ -120,21 +139,19 @@ void get_partitions(disk_info **disks, int c) {
     }
 }
 
-void mount_part(char* path, char* name) {
+void mount_part(char* path, char* name) { // "/bin", partition_name
     char command[256];
-    snprintf(command, sizeof(command), "cd %s && mkdir mnt/%s && sudo mount %s mnt/%s", path, name+5, name, name+5);
-    printf("%s\n", command);
+    snprintf(command, sizeof(command), "cd %s && mkdir -p mnt/%s && sudo mount %s mnt/%s", path, name+5, name, name+5);
     system(command);
 }
 
-void umount_part(char* path, char* name) {
+void umount_part(char* path, char* name) { // "/bin", partition_name
     char command[256];
     snprintf(command, sizeof(command), "cd %s && sudo umount mnt/%s", path, name+5);
-    printf("%s\n", command);
     system(command);
 }
 
-int get_mounted_info(char* path, disk_info *disk) {
+int get_mounted_info(char* path, disk_info *disk) { // "/bin", disks
     FILE *f;
     struct mntent *mnt;
 
@@ -174,7 +191,58 @@ int get_mounted_info(char* path, disk_info *disk) {
     return 0;
 }
 
+void get_disk_stats(const char* disk_name) { //sda
+    char path[256];
+    FILE* fp;
+    snprintf(path, 256, "%s/%s/stat", disks_dir, disk_name);
+    fp = fopen(path, "r");
+    if(fp) {
+        unsigned long reads, writes, read_sectors, write_sectors;
+        unsigned long read_errors, write_errors;
+        
+        if (fscanf(fp, "%lu %*u %lu %*u %*u %lu %*u %*u %lu %*u %*u %lu %lu",
+                  &reads, &read_sectors, &writes, &write_sectors,
+                  &read_errors, &write_errors) >= 6) {
+            printf("\nIO-Errors:\n");
+            printf("  Read Errors: %lu\n", read_errors);
+            printf("  Write Errors: %lu\n", write_errors);
+            
+            if (read_errors > 1000 || write_errors > 1000) {
+                printf("  CAUTION: A lot of IO-Errors!\n");
+            }
+        }
+        fclose(fp);
+    }
+}
 
+void call_badblocks(const char* disk_name) { //sda
+    char com[256];
+    snprintf(com, 256, "sudo badblocks -sv /dev/%s", disk_name);
+    system(com);
+}
+
+float get_disk_temp(const char* disk_name) { //sda
+    char path[256];
+    glob_t glob_result;
+    float temp = -1.0;
+
+    snprintf(path, 256, "/sys/class/block/%s/device/hwmon*/temp*_input", disk_name);
+    if(glob(path, 0, NULL, &glob_result) == 0) {
+        for(int i = 0; i < glob_result.gl_pathc; i++) {
+            FILE *fp = fopen(glob_result.gl_pathv[i], "r");
+            if(fp) {
+                char buf[32];
+                if(fgets(buf, 32, fp)) {
+                    temp = atoi(buf) / 1000.f;
+                }
+                fclose(fp);
+                break;
+            }
+        }
+        globfree(&glob_result);
+    }
+    return temp;
+}
 
 void get_swap() {
     struct statvfs info;
