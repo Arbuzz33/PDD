@@ -23,17 +23,16 @@ int main(int argc, char* argv[]) {
     //call_fdisk("/dev/sda");
     //call_mkfs("/dev/sda1", "ext4");
     
-    //if((file_count = get_files(&files, "/home/nigger/Desktop")) > 0) {
-    //    print_files(files, file_count, "s");
-    //}
+    /*if((file_count = get_files(&files, "/home/danila/Desktop/pdd")) > 0) {
+        print_files(&files, file_count, "s");
+    }*/
 
-    //if((dir_count = get_dirs(&dirs, "/home/nigger/Desktop")) > 0) {
-    //    print_files(dirs, dir_count, "t3s2");
-    //}
-
-    //get_disk_stats("sda");
-    //printf("nvme0n1 temperature: %f\n", get_disk_temp("nvme0n1"));
-    //call_badblocks("nvme0n1");
+    /*if((dir_count = get_dirs(&dirs, "/home/danila")) > 0) {
+        print_files(&dirs, dir_count, "t3s2");
+    }*/
+    /*get_disk_stats("sdb3");
+    printf("nvme0n1 temperature: %f\n", get_disk_temp("sdb3"));
+    call_badblocks("sdb3");*/
 
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
@@ -69,6 +68,20 @@ int main(int argc, char* argv[]) {
                 for(int i = 0; i < count; i++)
                     for(int j = 0; j < system_disks[i].parts_count-1; j++)
                         umount_part(path, system_disks[i].parts[j].nam);
+            }
+        }
+        else if (strstr(input, "printfiles") != 0) {
+            char *file_path = strtok(input+11,",");
+            char *sort_file_args = strtok(NULL, ",)");
+            if((file_count = get_files(&files, file_path)) > 0) {
+                print_files(&files, file_count, sort_file_args);
+            }
+        }
+        else if (strstr(input, "printdirs") != 0) {
+            char *dir_path = strtok(input+10,",");
+            char *sort_dir_args = strtok(NULL, ",)");
+            if((dir_count = get_dirs(&dirs, dir_path)) > 0) {
+                print_files(&dirs, dir_count, sort_dir_args);
             }
         }
         else if(strcmp(input, "textinvert") == 0) {
