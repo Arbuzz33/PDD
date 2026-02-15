@@ -30,9 +30,9 @@ int main(int argc, char* argv[]) {
     /*if((dir_count = get_dirs(&dirs, "/home/danila")) > 0) {
         print_files(&dirs, dir_count, "t3s2");
     }*/
-    /*get_disk_stats("sdb3");
-    printf("nvme0n1 temperature: %f\n", get_disk_temp("sdb3"));
-    call_badblocks("sdb3");*/
+    /*get_disk_stats("sdb");
+    printf("nvme0n1 temperature: %f\n", get_disk_temp("nvme0n1"));
+    call_badblocks("sdb");*/
 
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
