@@ -12,6 +12,7 @@ int count = 0;
 char command[256];
 char *path;
 char input[80] = "pddc";
+int new_len;
 file *files;
 directory *dirs;
 unsigned int file_count = 0;
@@ -30,13 +31,15 @@ int main(int argc, char* argv[]) {
     /*if((dir_count = get_dirs(&dirs, "/home/danila")) > 0) {
         print_files(&dirs, dir_count, "t3s2");
     }*/
-    /*get_disk_stats("sdb");
-    printf("nvme0n1 temperature: %f\n", get_disk_temp("nvme0n1"));
-    call_badblocks("sdb");*/
+    /*get_disk_stats("sdb3");
+    printf("nvme0n1 temperature: %f\n", get_disk_temp("sdb3"));
+    call_badblocks("sdb3");*/
 
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
-        scanf("%s", input);
+        //scanf("%s", input);
+        fgets(input, sizeof(input), stdin);
+        input[strcspn(input, "\n")] = 0;
         if(strcmp(input, "quit") == 0 || strcmp(input, "exit") == 0) {
             printf("Bye!\n");
         }
@@ -71,18 +74,30 @@ int main(int argc, char* argv[]) {
             }
         }
         else if (strstr(input, "printfiles") != 0) {
-            char *file_path = strtok(input+11,",");
-            char *sort_file_args = strtok(NULL, ",)");
+            char* sort_file_args;
+            char* file_args_raw = strchr(input, '-');
+            char* file_path = strchr(input, '/');
+            new_len = strlen(file_args_raw) - strlen(strchr(file_args_raw, ' '));
+            sort_file_args = malloc(new_len + 1);
+            strncpy(sort_file_args, file_args_raw, new_len+1);
+            memmove(sort_file_args, sort_file_args + 1, strlen(sort_file_args));
             if((file_count = get_files(&files, file_path)) > 0) {
                 print_files(&files, file_count, sort_file_args);
             }
+            free(sort_file_args);
         }
         else if (strstr(input, "printdirs") != 0) {
-            char *dir_path = strtok(input+10,",");
-            char *sort_dir_args = strtok(NULL, ",)");
+            char* sort_dir_args;
+            char* dir_args_raw = strchr(input, '-');
+            char* dir_path = strchr(input, '/');
+            new_len = strlen(dir_args_raw) - strlen(strchr(dir_args_raw, ' '));
+            sort_dir_args = malloc(new_len + 1);
+            strncpy(sort_dir_args, dir_args_raw, new_len+1);
+            memmove(sort_dir_args, sort_dir_args + 1, strlen(sort_dir_args));
             if((dir_count = get_dirs(&dirs, dir_path)) > 0) {
                 print_files(&dirs, dir_count, sort_dir_args);
             }
+            free(sort_dir_args);
         }
         else if(strcmp(input, "textinvert") == 0) {
             printf(INVERT);
