@@ -13,6 +13,7 @@ char command[256];
 char *path;
 char input[80] = "pddc";
 int new_len;
+char* disk_name_command;
 file *files;
 directory *dirs;
 unsigned int file_count = 0;
@@ -21,8 +22,8 @@ unsigned int dir_count = 0;
 int main(int argc, char* argv[]) {
     parse_args(argc,argv);
     get_program_path(&path);
-    //call_fdisk("/dev/sda");
-    //call_mkfs("/dev/sda1", "ext4");
+    //call_fdisk("/dev/sdb3");
+    //call_mkfs("/dev/sdb3", "ext4");
     
     /*if((file_count = get_files(&files, "/home/danila/Desktop/pdd")) > 0) {
         print_files(&files, file_count, "s");
@@ -31,9 +32,9 @@ int main(int argc, char* argv[]) {
     /*if((dir_count = get_dirs(&dirs, "/home/danila")) > 0) {
         print_files(&dirs, dir_count, "t3s2");
     }*/
-    /*get_disk_stats("sdb3");
-    printf("nvme0n1 temperature: %f\n", get_disk_temp("sdb3"));
-    call_badblocks("sdb3");*/
+    /*get_disk_stats("sda");
+    printf("nvme0n1 temperature: %f\n", get_disk_temp("nvme0n1"));*/
+    //call_badblocks("sdb3");
 
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
@@ -85,6 +86,26 @@ int main(int argc, char* argv[]) {
                 print_files(&files, file_count, sort_file_args);
             }
             free(sort_file_args);
+        }
+        else if(strstr(input, "temperature") != 0){
+            disk_name_command = strchr(input, '-');
+            memmove(disk_name_command, disk_name_command + 1, strlen(disk_name_command));
+            printf(disk_name_command);
+            printf(" temperature: %f\n", get_disk_temp(disk_name_command));
+        }
+        else if (strstr(input, "badblks") != 0){
+            disk_name_command = strchr(input, '-');
+            memmove(disk_name_command, disk_name_command + 1, strlen(disk_name_command));
+            call_badblocks(disk_name_command);
+        }
+        else if (strstr(input, "checkio") != 0){
+            disk_name_command = strchr(input, '-');
+            memmove(disk_name_command, disk_name_command + 1, strlen(disk_name_command));
+            get_disk_stats(disk_name_command);
+        }
+        else if (strstr(input, "format") != 0){
+            disk_name_command = strchr(input, '/');
+            call_fdisk(disk_name_command);
         }
         else if (strstr(input, "printdirs") != 0) {
             char* sort_dir_args;
