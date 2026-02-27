@@ -36,6 +36,7 @@ int get_mounted_info(char* path, disk_info *disk);      //gets more info from mo
 void print_disk_info(disk_info *disks, int count);      //prints disks' info
 void get_disk_stats(const char* disk_name);             //prints read/write stats
 void call_badblocks(const char* disk_name);             //calls badblocks on disk
+void call_speedtest(char* path, const char* part_name); //calls test_speed.sh on partition
 float get_disk_temp(const char* disk_name);             //returns temp of disk
 
 #endif

@@ -221,6 +221,12 @@ void call_badblocks(const char* disk_name) { //sda
     system(com);
 }
 
+void call_speedtest(char* path, const char* part_name) { // "/bin", sda1
+    char com[256];
+    snprintf(com, 256, "sudo ./test_speed.sh %s/mnt/%s", path, part_name);
+    system(com);
+}
+
 float get_disk_temp(const char* disk_name) { //sda
     char path[256];
     glob_t glob_result;

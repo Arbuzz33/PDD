@@ -21,7 +21,7 @@ echo "Read test..."
 READ_OUTPUT=$(sudo dd if=${dest}/${filename}.zov of=/dev/null bs=1M iflag=direct 2>&1 | tail -1)
 READ_SPEED=$(echo "$READ_OUTPUT" | awk '{print $10 $11}')
 
-sudo rm -f ${dest}/${filename}.zov
-
 echo ""
 echo "Writing $WRITE_SPEED, Reading $READ_SPEED"
+
+sudo rm -f ${dest}/${filename}.zov

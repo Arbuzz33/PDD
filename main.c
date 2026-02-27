@@ -22,23 +22,9 @@ unsigned int dir_count = 0;
 int main(int argc, char* argv[]) {
     parse_args(argc,argv);
     get_program_path(&path);
-    //call_fdisk("/dev/sdb3");
-    //call_mkfs("/dev/sdb3", "ext4");
-    
-    /*if((file_count = get_files(&files, "/home/danila/Desktop/pdd")) > 0) {
-        print_files(&files, file_count, "s");
-    }*/
-
-    /*if((dir_count = get_dirs(&dirs, "/home/danila")) > 0) {
-        print_files(&dirs, dir_count, "t3s2");
-    }*/
-    /*get_disk_stats("sda");
-    printf("nvme0n1 temperature: %f\n", get_disk_temp("nvme0n1"));*/
-    //call_badblocks("sdb3");
 
     while(strncmp(input, "quit", 4) != 0 && strncmp(input, "exit", 4) != 0) {
         printf("pdd> ");
-        //scanf("%s", input);
         fgets(input, sizeof(input), stdin);
         input[strcspn(input, "\n")] = 0;
         if(strcmp(input, "quit") == 0 || strcmp(input, "exit") == 0) {
@@ -64,7 +50,7 @@ int main(int argc, char* argv[]) {
             print_disk_info(system_disks, count);
         }
         else if (strcmp(input, "unmountdisks") == 0)
-        {   
+        {
             char option;
             printf("Are you sure? [Y/N] ");
             scanf("%s", &option);
@@ -103,9 +89,30 @@ int main(int argc, char* argv[]) {
             memmove(disk_name_command, disk_name_command + 1, strlen(disk_name_command));
             get_disk_stats(disk_name_command);
         }
-        else if (strstr(input, "format") != 0){
-            disk_name_command = strchr(input, '/');
+        else if (strstr(input, "format") != 0) {
+            disk_name_command = strchr(input, '-');
+            memmove(disk_name_command, disk_name_command + 1, strlen(disk_name_command));
             call_fdisk(disk_name_command);
+        } else if(strstr(input, "speedtest") != 0) {
+            char option;
+            char part_name[32];
+            printf("To do this, mount the partition. Mount? [Y/N] ");
+            scanf("%s", &option);
+            if (option == 'Y' || option == 'y') {
+                disk_name_command = strchr(input, '-');
+                memmove(disk_name_command, disk_name_command + 1, strlen(disk_name_command));
+                snprintf(part_name, 32, "/dev/%s", disk_name_command);
+                printf("partname: %s, diskname: %s\n", part_name, disk_name_command);
+                mount_part(path, part_name);
+                call_speedtest(path, disk_name_command);
+                printf("Want to unmount this partition? [Y/N] ");
+                scanf("%s", &option);
+                if (option == 'Y' || option == 'y') {
+                    umount_part(path, part_name);
+                }
+            } else {
+                printf("Can't do speedtest\n");
+            }
         }
         else if (strstr(input, "printdirs") != 0) {
             char* sort_dir_args;
@@ -126,12 +133,12 @@ int main(int argc, char* argv[]) {
         else if(strcmp(input, "textdefault") == 0) {
             printf(DEFAULT);
         }
+        else if(strlen(input) == 0) {
+            printf("");
+        }
         else {
             printf(" Bad usage. Type \"help\" to check yourself \n");
         }
     }
     return 0;
-    /*commands: printfiles(s[0-4]-size,t-tail[0-count],h-head[0-count]),
-    printdirs(s[0-4]-size,t-tail[0-count],h-head[0-count]),
-    */
 }

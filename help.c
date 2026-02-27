@@ -23,13 +23,20 @@ void get_program_path(char** p) {
 }
 
 void print_help() {
-    printf("  Available commands:\n");
-    printf("  1.quit/exit - exit the application\n");
-    printf("  2.diskinfo - get information about disks with option to mount them\n");
-    printf("  3.unmountdisks - unmount all mounted disks\n");
-    printf("  4.printfiles(path_to_directory,s[0-4]-size,t-tail[0-count],h-head[0-count]) - print all files in a directory (with options)\n");
-    printf("  5.printdirs(path_to_directory,s[0-4]-size,t-tail[0-count],h-head[0-count]) - print all directories in a directory (with options)\n");
-    printf("  printfiles and printdirs have sorting:a - alphabet,r - reversed alphabet; l - smaller files first, g - nigger files first\n");
+    printf(" Available commands:\n");
+    printf("  help - prints explanation of all commands\n");
+    printf("  quit/exit - quits the program\n");
+    printf("  textinvert - inverts text\n");
+    printf("  textdefault - text format and colors become default\n");
+    printf("  diskinfo - prints info about all disks with their partitions (also lets you mount them to get more info)\n");
+    printf("  unmountsdisks - use it after diskinfo if disks were mounted\n");
+    printf("  printfiles - prints files in a given directory. Ex: \"printfiles -sgh5 /bin\" - prints first 5 files (h5) with sizes (s) from bigger to lesser (g)\n");
+    printf("  printdirs - prints directories in a given directory. Ex: \"printdirs -slt5 /home/user/Documents\" - prints last 5 files (t5) with sizes (s) from lesser to bigger (l)\n");
+    printf("  speedtest - does speed test of a given partition (need to be mounted). Ex: \"speedtest -sda1\" - makes speedtest of a first partition of disk sda\n");
+    printf("  temperature - prints temperature of a given disk. Ex: \"temperature -nvme0n1\" - prints the temperature of disk nvme0n1\n");
+    printf("  badblks - checks bad blocks on a disk. Ex: \"badblks -sdb\" - makes check of badblocks on disk sdb\n");
+    printf("  checkio - checks input/output errors on a disk. Ex: \"checkio -nvme1n1\" - prints errors and recomendations on disk nvme1n1\n");
+    printf("  format - formats the disks (at this moment only partition table). Ex: \"format -sdc\" - lets you create new partition table on sdc (uses fdisk)\n");
 }
 
 void parse_args(int argc, char* argv[]){
