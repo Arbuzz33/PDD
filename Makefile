@@ -7,6 +7,7 @@ OBJ = $(SRC:.c=.o)
 all: $(TARGET)
 $(TARGET): $(OBJ)
 	$(CC) $(OBJ) -o $(TARGET)
+	sudo chmod +x test_speed.sh
 
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
