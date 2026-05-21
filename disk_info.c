@@ -223,7 +223,7 @@ void call_badblocks(const char* disk_name) { //sda
 
 void call_speedtest(char* path, const char* part_name) { // "/bin", sda1
     char com[256];
-    snprintf(com, 256, "sudo ./test_speed.sh %s/mnt/%s", path, part_name);
+    snprintf(com, 256, "sudo /usr/local/bin/test_speed.sh %s/mnt/%s", path, part_name);
     system(com);
 }
 

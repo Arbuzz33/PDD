@@ -17,7 +17,10 @@ clean:
 
 install:
 	sudo cp $(TARGET) /usr/local/bin
+	sudo cp test_speed.sh /usr/local/bin
 	sudo chmod +x /usr/local/bin/$(TARGET)
+	sudo chmod +x /usr/local/bin/test_speed.sh
 
 delete:
 	sudo rm -f /usr/local/bin/$(TARGET)
+	sudo rm -f /usr/local/bin/test_speed.sh
